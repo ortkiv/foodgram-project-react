@@ -11,10 +11,6 @@ class Ingridient(models.Model):
         'Название',
         max_length=200
     )
-    quantity = models.IntegerField(
-        'Колличество',
-        validators=[MinValueValidator(0)]
-    )
     measurement_unit = models.CharField(
         'Единицы измерения',
         max_length=80
@@ -39,6 +35,7 @@ class Tag(models.Model):
     )
     slug = models.SlugField(
         'Slug',
+        max_length=200,
         unique=True
     )
 

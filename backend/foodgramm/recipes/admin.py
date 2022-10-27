@@ -49,10 +49,9 @@ class IngridientAdmin(admin.ModelAdmin):
     list_display = (
         'pk',
         'name',
-        'quantity',
         'measurement_unit'
     )
-    list_editable = ('name', 'quantity', 'measurement_unit')
+    list_editable = ('name', 'measurement_unit')
     search_fields = ('name',)
     list_filter = ('measurement_unit',)
     empty_value_display = '-пусто-'

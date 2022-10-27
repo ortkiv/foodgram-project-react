@@ -9,12 +9,12 @@ class User(AbstractUser):
         ('admin', 'Admin'),
     )
     first_name = models.CharField(
-        max_length=50,
+        max_length=150,
         blank=False,
         verbose_name='Имя'
     )
     last_name = models.CharField(
-        max_length=50,
+        max_length=150,
         blank=False,
         verbose_name='Фамилия'
     )
@@ -28,4 +28,7 @@ class User(AbstractUser):
         choices=USER_ROLE_CHOICES,
         default='guest',
         verbose_name='User role'
+    )
+    is_subscribed = models.BooleanField(
+        default=False
     )
