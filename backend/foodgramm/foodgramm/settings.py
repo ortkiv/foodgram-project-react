@@ -12,9 +12,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-5%e$i)c6u8&fhf1mibwa^)fx6#-oy^@mk-5go4@^!mtgk5qico'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+
+CSRF_TRUSTED_ORIGINS = ['http://*.localhost/admin/', 'https://*.localhost/admin/']
 
 
 # Application definition
@@ -48,10 +51,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'foodgramm.urls'
 
+TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATES_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,8 +76,12 @@ WSGI_APPLICATION = 'foodgramm.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', default='DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER', default='POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST', default='DB_HOST'),
+        'PORT': os.getenv('DB_PORT', default='DB_PORT')
     }
 }
 
@@ -112,7 +120,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+MEDIA_URL = '/media/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field

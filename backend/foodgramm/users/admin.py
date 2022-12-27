@@ -1,6 +1,7 @@
 from django.contrib import admin
-from .models import User
-from django.contrib.auth.models import Group
+from django.contrib.auth import get_user_model, models
+
+User = get_user_model()
 
 
 @admin.register(User)
@@ -14,4 +15,4 @@ class UserAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
-admin.site.unregister(Group)
+admin.site.unregister(models.Group)

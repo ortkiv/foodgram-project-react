@@ -65,12 +65,12 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Катринка',
-        upload_to='foodgramm/images/'
+        upload_to='foodgramm/images/',
+        blank=True
     )
     ingredients = models.ManyToManyField(
         Ingridient,
-        verbose_name='Ингридиенты',
-        related_name='recipes'
+        through='IngredientInRecipe'
     )
     tags = models.ManyToManyField(
         Tag,
@@ -90,23 +90,46 @@ class Recipe(models.Model):
         return self.name
 
 
-# class RecipeTag(models.Model):
-#    recipe = models.ForeignKey(
-#        Recipe,
-#        on_delete=models.CASCADE
-#    )
-#    tag = models.ForeignKey(
-#        Tag,
-#        on_delete=models.CASCADE
-#    )
+class IngredientInRecipe(models.Model):
+    ingredient = models.ForeignKey(Ingridient, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+    amount = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique IngredientInRecipe'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.ingredient} {self.recipe}'
 
 
-# class RecipeIngridients(models.Model):
-#    recipe = models.ForeignKey(
-#        Recipe,
-#        on_delete=models.CASCADE
-#    )
-#    ingridients = models.ForeignKey(
-#        Ingridient,
-#        on_delete=models.CASCADE
-#    )
+class Follow(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='Подписчик'
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='publisher',
+        verbose_name='Автор подписки'
+    )
+
+    class Meta:
+        verbose_name = 'Подписку'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'user'],
+                name='unique follow'
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.author} - {self.user}'
