@@ -1,15 +1,26 @@
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsOwner
 from .serializers import (
     IngredientSerializer,
+    InShopCartSerializer,
     TagSerializer,
     RecipeSerializer,
     UserSerializer,
     UserCreateSerializer,
     UserWithRecipesSerializer,
+    FavoriteSerializer,
     FollowSerializer
 )
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Ingridient, Follow, Tag, Recipe
+from recipes.models import (
+    Ingridient,
+    InShopCart,
+    Favorite,
+    Follow,
+    Tag,
+    Recipe
+)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from django.contrib.auth import get_user_model
@@ -48,6 +59,60 @@ class RecipeViewSet(ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated]
+    )
+    def favorite(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, id=pk)
+        user = request.user
+        if request.method == 'POST':
+            data = {
+                'recipe': recipe.id,
+                'user': user.id
+            }
+            ser = FavoriteSerializer(data=data, context={'request': request})
+            if ser.is_valid():
+                ser.save()
+                return Response(ser.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+        favorite = get_object_or_404(Favorite, recipe=recipe, user=user)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated]
+    )
+    def shopping_cart(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, id=pk)
+        user = request.user
+        if request.method == 'POST':
+            data = {
+                'recipe': recipe.id,
+                'user': user.id
+            }
+            ser = InShopCartSerializer(data=data, context={'request': request})
+            if ser.is_valid():
+                ser.save()
+                return Response(ser.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+        favorite = get_object_or_404(InShopCart, recipe=recipe, user=user)
+        favorite.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, permission_classes=[IsAuthenticated])
+    def download_shopping_cart(self, request):
+        serializer = UserSerializer(
+            request.user,
+            context={'request': request}
+        )
+        return Response(serializer.data)
+
 
 class UserViewSet(ModelViewSet):
     queryset = User.objects.all()
@@ -66,7 +131,7 @@ class UserViewSet(ModelViewSet):
         )
         return Response(serializer.data)
 
-    @action(detail=False)
+    @action(detail=False, permission_classes=[IsOwner])
     def subscriptions(self, request):
         users = User.objects.filter(publisher__user=request.user)
         page = self.paginate_queryset(users)
@@ -84,7 +149,11 @@ class UserViewSet(ModelViewSet):
         )
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post', 'delete'])
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated]
+    )
     def subscribe(self, request, pk=None):
         author = get_object_or_404(User, id=pk)
         user = request.user

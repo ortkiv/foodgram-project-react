@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Ingridient, Follow, Recipe, Tag
+from .models import InShopCart, Favorite, Ingridient, Follow, Recipe, Tag
 
 
 class RecipeTagInline(admin.TabularInline):
@@ -67,4 +67,30 @@ class FollowAdmin(admin.ModelAdmin):
     list_editable = ('user', 'author')
     search_fields = ('user',)
     list_filter = ('author',)
+    empty_value_display = '-пусто-'
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'user',
+        'recipe'
+    )
+    list_editable = ('user', 'recipe')
+    search_fields = ('recipe',)
+    list_filter = ('user',)
+    empty_value_display = '-пусто-'
+
+
+@admin.register(InShopCart)
+class InShopCartAdmin(admin.ModelAdmin):
+    list_display = (
+        'pk',
+        'user',
+        'recipe'
+    )
+    list_editable = ('user', 'recipe')
+    search_fields = ('recipe',)
+    list_filter = ('user',)
     empty_value_display = '-пусто-'

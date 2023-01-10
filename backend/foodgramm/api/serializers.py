@@ -8,7 +8,15 @@ from rest_framework.serializers import (
 )
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer, UserCreateSerializer
-from recipes.models import Ingridient, IngredientInRecipe, Follow, Tag, Recipe
+from recipes.models import (
+    Ingridient,
+    InShopCart,
+    Favorite,
+    IngredientInRecipe,
+    Follow,
+    Tag,
+    Recipe
+)
 # from .fields import CurrentAuthorDefault
 from rest_framework.validators import UniqueTogetherValidator
 # from rest_framework.serializers import ValidationError
@@ -107,9 +115,21 @@ class RecipeSerializer(ModelSerializer):
         fields = '__all__'
 
     def get_is_favorited(self, obj):
+        user = self.context.get('request').user
+        if user.is_authenticated and Favorite.objects.filter(
+            user=user,
+            recipe=obj
+        ).exists():
+            return True
         return False
 
     def get_is_in_shopping_cart(self, obj):
+        user = self.context.get('request').user
+        if user.is_authenticated and InShopCart.objects.filter(
+            user=user,
+            recipe=obj
+        ).exists():
+            return True
         return False
 
     def create(self, validated_data):
@@ -234,3 +254,47 @@ class FollowSerializer(ModelSerializer):
             context={'request': request}
         ).data
         return repr
+
+
+class FavoriteSerializer(ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Favorite.objects.all(),
+                fields=('recipe', 'user'),
+                message="Один рецепт можно добавить"
+                        "в избранное только один раз!"
+            )
+        ]
+
+    def to_representation(self, instance):
+        return {
+            "id": instance.recipe.id,
+            "name": instance.recipe.name,
+            # "image": instance.recipe.image,
+            "cooking_time": instance.recipe.cooking_time
+        }
+
+
+class InShopCartSerializer(ModelSerializer):
+    class Meta:
+        model = InShopCart
+        fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=InShopCart.objects.all(),
+                fields=('recipe', 'user'),
+                message="Один рецепт можно добавить"
+                        "в список покупок только один раз!"
+            )
+        ]
+
+    def to_representation(self, instance):
+        return {
+            "id": instance.recipe.id,
+            "name": instance.recipe.name,
+            # "image": instance.recipe.image,
+            "cooking_time": instance.recipe.cooking_time
+        }

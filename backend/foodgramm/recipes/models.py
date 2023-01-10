@@ -133,3 +133,59 @@ class Follow(models.Model):
 
     def __str__(self) -> str:
         return f'{self.author} - {self.user}'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='owner',
+        verbose_name='Владелец_избранного'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipes',
+        verbose_name='рецепт_из_избранного'
+    )
+
+    class Meta:
+        verbose_name = 'Избранный'
+        verbose_name_plural = 'Избранные'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'user'],
+                name='unique favorite'
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.recipe} - {self.user}'
+
+
+class InShopCart(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='host',
+        verbose_name='Владелец_списка'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='host_recipes',
+        verbose_name='рецепт_из_списка'
+    )
+
+    class Meta:
+        verbose_name = 'рецепт_из_списка_покупок'
+        verbose_name_plural = 'рецепты_из_списка_покупок'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'user'],
+                name='unique inshopcard'
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.recipe} - {self.user}'
