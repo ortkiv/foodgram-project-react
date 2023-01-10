@@ -9,11 +9,14 @@ from .serializers import (
     FollowSerializer
 )
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import Ingridient, Tag, Recipe
+from recipes.models import Ingridient, Follow, Tag, Recipe
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
 
 User = get_user_model()
 
@@ -55,22 +58,71 @@ class UserViewSet(ModelViewSet):
             return UserCreateSerializer
         return UserSerializer
 
+    @action(detail=False)
+    def me(self, request, pk=None):
+        serializer = UserSerializer(
+            request.user,
+            context={'request': request}
+        )
+        return Response(serializer.data)
 
-class SubscriptionsViewSet(ModelViewSet):
-    pagination_class = PageNumberPagination
-    serializer_class = UserWithRecipesSerializer
+    @action(detail=False)
+    def subscriptions(self, request):
+        users = User.objects.filter(publisher__user=request.user)
+        page = self.paginate_queryset(users)
+        if page is not None:
+            serializer = UserWithRecipesSerializer(
+                page,
+                context={'request': request},
+                many=True
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = UserWithRecipesSerializer(
+            users,
+            context={'request': request},
+            many=True
+        )
+        return Response(serializer.data)
 
-    def get_queryset(self):
-        return User.objects.filter(publisher__user=self.request.user)
+    @action(detail=True, methods=['post', 'delete'])
+    def subscribe(self, request, pk=None):
+        author = get_object_or_404(User, id=pk)
+        user = request.user
+        if request.method == 'POST':
+            data = {
+                'author': author.id,
+                'user': user.id
+            }
+            ser = FollowSerializer(data=data, context={'request': request})
+            if ser.is_valid():
+                ser.save()
+                return Response(ser.data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+        follow = get_object_or_404(Follow, author=author, user=user)
+        follow.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class SubscribeViewSet(ModelViewSet):
-    pagination_class = None
-    serializer_class = FollowSerializer
+# class SubscriptionsViewSet(mixins.ListModelMixin, GenericViewSet):
+#    pagination_class = PageNumberPagination
+#    serializer_class = UserWithRecipesSerializer
 
-    def get_queryset(self):
-        return User.objects.filter(publisher__user=self.request.user)
+#    def get_queryset(self):
+#        return User.objects.filter(publisher__user=self.request.user)
 
-    def perform_create(self, serializer):
-        author = get_object_or_404(User, id=self.kwargs.get('user_id'))
-        serializer.save(user=self.request.user, author=author)
+
+# class SubscribeViewSet(
+#    mixins.CreateModelMixin,
+#    mixins.DestroyModelMixin,
+#    GenericViewSet
+# ):
+#    pagination_class = None
+#    serializer_class = FollowSerializer
+
+#    def get_queryset(self):
+#        return Follow.objects.filter(user=self.request.user)
+
+#    def perform_create(self, serializer):
+#        author = get_object_or_404(User, id=self.kwargs.get('user_id'))
+#        serializer.save(user=self.request.user, author=author)

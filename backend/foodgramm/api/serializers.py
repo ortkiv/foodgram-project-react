@@ -1,15 +1,17 @@
 from rest_framework.serializers import (
-    CurrentUserDefault,
+    # CurrentUserDefault,
     ModelSerializer,
     SerializerMethodField,
-    StringRelatedField,
-    PrimaryKeyRelatedField
+    # StringRelatedField,
+    PrimaryKeyRelatedField,
+    ValidationError
 )
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer, UserCreateSerializer
 from recipes.models import Ingridient, IngredientInRecipe, Follow, Tag, Recipe
-from .fields import CurrentAuthorDefault
+# from .fields import CurrentAuthorDefault
 from rest_framework.validators import UniqueTogetherValidator
+# from rest_framework.serializers import ValidationError
 
 User = get_user_model()
 
@@ -41,7 +43,14 @@ class UserSerializer(UserSerializer):
 class UserCreateSerializer(UserCreateSerializer):
     class Meta():
         model = User
-        fields = ('email', 'username', 'first_name', 'last_name', 'password')
+        fields = (
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'password'
+        )
 
 
 class IngredientSerializer(ModelSerializer):
@@ -199,13 +208,6 @@ class UserWithRecipesSerializer(UserSerializer):
 
 
 class FollowSerializer(ModelSerializer):
-    user = StringRelatedField(
-        default=CurrentUserDefault()
-    )
-    author = StringRelatedField(
-        default=CurrentAuthorDefault()
-    )
-
     class Meta:
         model = Follow
         fields = '__all__'
@@ -217,3 +219,18 @@ class FollowSerializer(ModelSerializer):
                         "можно подписаться только один раз!"
             )
         ]
+
+    def validate(self, data):
+        if self.context.get('request').user == data.get('author'):
+            raise ValidationError(
+                "Нельзя подписаться на самого себя!"
+            )
+        return data
+
+    def to_representation(self, instance):
+        request = self.context.get('request')
+        repr = UserWithRecipesSerializer(
+            instance.author,
+            context={'request': request}
+        ).data
+        return repr

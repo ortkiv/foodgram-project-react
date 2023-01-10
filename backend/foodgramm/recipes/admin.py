@@ -22,7 +22,7 @@ class RecipeAdmin(admin.ModelAdmin):
         'image',
         'cooking_time'
     )
-    list_editable = ('name', 'text', 'image', 'cooking_time',)
+    list_editable = ('author', 'name', 'text', 'image', 'cooking_time',)
     search_fields = ('name',)
     list_filter = ('cooking_time',)
     empty_value_display = '-пусто-'
