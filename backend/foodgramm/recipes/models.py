@@ -75,7 +75,8 @@ class Recipe(models.Model):
     tags = models.ManyToManyField(
         Tag,
         related_name='recipes',
-        verbose_name='Тэг'
+        verbose_name='Тэг',
+        blank=True
     )
     cooking_time = models.IntegerField(
         'Время приготовления в минутах',
@@ -145,7 +146,7 @@ class Favorite(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='recipes',
+        related_name='fav_recipes',
         verbose_name='рецепт_из_избранного'
     )
 

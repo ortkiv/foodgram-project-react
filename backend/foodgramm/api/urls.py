@@ -16,16 +16,6 @@ router.register('users', UserViewSet, basename='users')
 router.register('ingredients', IngridientViewSet, basename='ingredients')
 router.register('tags', TagViewSet, basename='tags')
 router.register('recipes', RecipeViewSet, basename='recipes')
-# router.register(
-#    'users/subscriptions',
-#    SubscriptionsViewSet,
-#    basename='subscriptions'
-# )
-# router.register(
-#    r'users/(?P<user_id>\d+)/subscribe',
-#    SubscribeViewSet,
-# )
-# )
 
 
 urlpatterns = [

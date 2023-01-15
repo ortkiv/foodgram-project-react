@@ -1,5 +1,4 @@
 version: '3.3'
-
 services:
   db:
     image: postgres:13.0-alpine
@@ -8,11 +7,12 @@ services:
     env_file:
       - ./.env
   web:
-    build: ../foodgramm/
+    build: ../backend/foodgramm/
     command: gunicorn foodgramm.wsgi:application --bind 0.0.0.0:8000
     restart: always
     ports:
       - "8000:8000"
+      - "3000:3000"
     volumes:
       - static_value:/usr/src/app/web/static/
       - media_value:/usr/src/app/web/media/
@@ -20,6 +20,12 @@ services:
       - db
     env_file:
       - ./.env
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    volumes:
+      - ../frontend/:/app/result_build/
   nginx:
     image: nginx:1.21.3-alpine
     ports:
@@ -28,8 +34,8 @@ services:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
       - static_value:/var/html/static/
       - media_value:/var/html/media/
-    depends_on:
-      - web
+      - ../frontend/build:/usr/share/nginx/html/
+      - ../docs/:/usr/share/nginx/html/api/docs/
 volumes:
   database_value:
   static_value:

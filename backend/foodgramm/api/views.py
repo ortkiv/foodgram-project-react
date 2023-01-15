@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsOwner
+from .permissions import IsOwner, IsAuthor, IsReadOnly
 from .serializers import (
     IngredientSerializer,
     InShopCartSerializer,
@@ -15,6 +15,7 @@ from .serializers import (
 from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import (
     Ingridient,
+    IngredientInRecipe,
     InShopCart,
     Favorite,
     Follow,
@@ -28,6 +29,11 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.lib.pagesizes import A4
+from django.http import HttpResponse
 
 User = get_user_model()
 
@@ -49,6 +55,7 @@ class TagViewSet(ModelViewSet):
 class RecipeViewSet(ModelViewSet):
     serializer_class = RecipeSerializer
     queryset = Recipe.objects.all()
+    permission_classes = (IsAuthor | IsReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = (
         'author',
@@ -107,11 +114,43 @@ class RecipeViewSet(ModelViewSet):
 
     @action(detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
-        serializer = UserSerializer(
-            request.user,
-            context={'request': request}
-        )
-        return Response(serializer.data)
+        data = IngredientInRecipe.objects.filter(
+            recipe__host_recipes__user=request.user
+        ).values('ingredient', 'amount')
+        data_ing = set(ing['ingredient'] for ing in data)
+        data_clear = [
+            {
+                'ingredient': i,
+                'amount': sum(
+                    a['amount'] for a in data if a['ingredient'] == i
+                )
+            } for i in data_ing
+        ]
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="file.pdf"'
+        p = canvas.Canvas(response, pagesize=A4)
+        pdfmetrics.registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
+        p.setFont("FreeSans", 20)
+        width = 200
+        height = 770
+        p.drawString(width, 800, 'Список покупок:')
+        for x in data_clear:
+            name = Ingridient.objects.get(id=x['ingredient']).name
+            amount = x['amount']
+            unit = Ingridient.objects.get(id=x['ingredient']).measurement_unit
+            p.drawString(
+                width,
+                height,
+                f'-  {name} - {amount}{unit}'
+            )
+            height -= 20
+            if height <= 20:
+                p.showPage()
+                p.setFont("FreeSans", 20)
+                height = 800
+        p.showPage()
+        p.save()
+        return response
 
 
 class UserViewSet(ModelViewSet):

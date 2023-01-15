@@ -10,7 +10,7 @@ class UserAdmin(admin.ModelAdmin):
         'pk', 'username', 'first_name', 'last_name', 'email',
         'role', 'is_superuser', 'is_active'
     )
-    list_editable = ('role',)
+    list_editable = ('role', 'first_name', 'last_name')
     list_filter = ('first_name', 'email',)
     empty_value_display = '-пусто-'
 

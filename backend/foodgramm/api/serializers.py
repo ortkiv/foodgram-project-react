@@ -19,7 +19,9 @@ from recipes.models import (
 )
 # from .fields import CurrentAuthorDefault
 from rest_framework.validators import UniqueTogetherValidator
-# from rest_framework.serializers import ValidationError
+from rest_framework.serializers import ImageField
+import base64
+from django.core.files.base import ContentFile
 
 User = get_user_model()
 
@@ -76,13 +78,13 @@ class IngredientInRecipeSerializer(ModelSerializer):
     class Meta:
         model = IngredientInRecipe
         fields = ('id', 'amount')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=IngredientInRecipe.objects.all(),
-                fields=('id', 'amount'),
-                message="Ингредиент уже есть в рецепте! "
-            )
-        ]
+        # validators = [
+        #    UniqueTogetherValidator(
+        #        queryset=IngredientInRecipe.objects.all(),
+        #        fields=('id', 'amount'),
+        #        message="Ингредиент уже есть в рецепте! "
+        #    )
+        # ]
 
     def to_representation(self, instance):
         return {
@@ -99,6 +101,23 @@ class TagSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class Base64ImageField(ImageField):
+    def to_internal_value(self, data):
+        # Если полученный объект строка, и эта строка
+        # начинается с 'data:image'...
+        if isinstance(data, str) and data.startswith('data:image'):
+            # ...начинаем декодировать изображение из base64.
+            # Сначала нужно разделить строку на части.
+            format, imgstr = data.split(';base64,')
+            # И извлечь расширение файла.
+            ext = format.split('/')[-1]
+            # Затем декодировать сами данные и поместить результат в файл,
+            # которому дать название по шаблону.
+            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
+
+        return super().to_internal_value(data)
+
+
 class RecipeSerializer(ModelSerializer):
     author = UserSerializer(
         read_only=True
@@ -109,6 +128,7 @@ class RecipeSerializer(ModelSerializer):
     )
     is_favorited = SerializerMethodField()
     is_in_shopping_cart = SerializerMethodField()
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Recipe
@@ -157,6 +177,7 @@ class RecipeSerializer(ModelSerializer):
             instance.cooking_time
         )
         instance.tags.set(validated_data.get('tags', instance.tags))
+        IngredientInRecipe.objects.filter(recipe=instance).delete()
         ingredients = validated_data.get('ingredientinrecipe_set')['all']
         for ingredient in ingredients:
             current_ingredent = IngredientInRecipe.objects.filter(
