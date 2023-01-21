@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import InShopCart, Favorite, Ingridient, Follow, Recipe, Tag
+
+from .models import Favorite, Follow, Ingridient, InShopCart, Recipe, Tag
 
 
 class RecipeTagInline(admin.TabularInline):
@@ -18,13 +19,15 @@ class RecipeAdmin(admin.ModelAdmin):
         'pk',
         'author',
         'name',
-        'text',
-        'image',
-        'cooking_time'
+        'count_favorite',
+        'text'
     )
-    list_editable = ('author', 'name', 'text', 'image', 'cooking_time',)
-    search_fields = ('name',)
-    list_filter = ('cooking_time',)
+
+    def count_favorite(self, obj):
+        return Favorite.objects.filter(recipe=obj).count()
+    count_favorite.short_description = 'Кол-во добавлений в избранное'
+    list_editable = ('author', 'name', 'text',)
+    list_filter = ('name', 'author', 'tags')
     empty_value_display = '-пусто-'
 
 
@@ -38,8 +41,8 @@ class TagAdmin(admin.ModelAdmin):
         'slug'
     )
     list_editable = ('name', 'color', 'slug')
-    search_fields = ('name',)
-    list_filter = ('slug',)
+    search_fields = ('slug',)
+    list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 
@@ -52,8 +55,7 @@ class IngridientAdmin(admin.ModelAdmin):
         'measurement_unit'
     )
     list_editable = ('name', 'measurement_unit')
-    search_fields = ('name',)
-    list_filter = ('measurement_unit',)
+    list_filter = ('name',)
     empty_value_display = '-пусто-'
 
 

@@ -12,7 +12,6 @@ services:
     restart: always
     ports:
       - "8000:8000"
-      - "3000:3000"
     volumes:
       - static_value:/usr/src/app/web/static/
       - media_value:/usr/src/app/web/media/

@@ -8,9 +8,9 @@ User = get_user_model()
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'pk', 'username', 'first_name', 'last_name', 'email',
-        'role', 'is_superuser', 'is_active'
+        'password', 'is_superuser', 'is_active'
     )
-    list_editable = ('role', 'first_name', 'last_name')
+    list_editable = ('password', 'first_name', 'last_name', 'is_active')
     list_filter = ('first_name', 'email',)
     empty_value_display = '-пусто-'
 

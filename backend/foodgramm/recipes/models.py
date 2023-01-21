@@ -1,7 +1,7 @@
-from django.db import models
+from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
-from colorfield.fields import ColorField
+from django.db import models
 
 User = get_user_model()
 
@@ -65,8 +65,7 @@ class Recipe(models.Model):
     )
     image = models.ImageField(
         'Катринка',
-        upload_to='foodgramm/images/',
-        blank=True
+        upload_to='foodgramm/images/'
     )
     ingredients = models.ManyToManyField(
         Ingridient,
@@ -94,7 +93,7 @@ class Recipe(models.Model):
 class IngredientInRecipe(models.Model):
     ingredient = models.ForeignKey(Ingridient, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    amount = models.IntegerField()
+    amount = models.IntegerField(validators=[MinValueValidator(1)])
 
     class Meta:
         constraints = [

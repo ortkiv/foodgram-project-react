@@ -1,13 +1,8 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class User(AbstractUser):
-    USER_ROLE_CHOICES = (
-        ('guest', 'Guest'),
-        ('auth_user', 'Auth_User'),
-        ('admin', 'Admin'),
-    )
     first_name = models.CharField(
         max_length=150,
         blank=False,
@@ -22,12 +17,6 @@ class User(AbstractUser):
         unique=True,
         max_length=254,
         verbose_name='email address'
-    )
-    role = models.CharField(
-        max_length=10,
-        choices=USER_ROLE_CHOICES,
-        default='guest',
-        verbose_name='User role'
     )
     is_subscribed = models.BooleanField(
         default=False

@@ -1,27 +1,18 @@
-from rest_framework.serializers import (
-    # CurrentUserDefault,
-    ModelSerializer,
-    SerializerMethodField,
-    # StringRelatedField,
-    PrimaryKeyRelatedField,
-    ValidationError
-)
-from django.contrib.auth import get_user_model
-from djoser.serializers import UserSerializer, UserCreateSerializer
-from recipes.models import (
-    Ingridient,
-    InShopCart,
-    Favorite,
-    IngredientInRecipe,
-    Follow,
-    Tag,
-    Recipe
-)
-# from .fields import CurrentAuthorDefault
-from rest_framework.validators import UniqueTogetherValidator
-from rest_framework.serializers import ImageField
 import base64
+
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from recipes.models import (Favorite, Follow, IngredientInRecipe, Ingridient,
+                            InShopCart, Recipe, Tag)
+from rest_framework.serializers import (CurrentUserDefault, ImageField,
+                                        ModelSerializer,
+                                        PrimaryKeyRelatedField,
+                                        SerializerMethodField,
+                                        StringRelatedField, ValidationError)
+from rest_framework.validators import UniqueTogetherValidator
+
+from .fields import CurrentAuthorDefault
 
 User = get_user_model()
 
@@ -62,6 +53,17 @@ class UserCreateSerializer(UserCreateSerializer):
             'password'
         )
 
+    def create(self, validated_data):
+        user = User.objects.create(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
 
 class IngredientSerializer(ModelSerializer):
     class Meta:
@@ -88,10 +90,10 @@ class IngredientInRecipeSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         return {
-            'id': instance.ingredient.id,
-            'name': instance.ingredient.name,
-            'measurement_unit': instance.ingredient.measurement_unit,
-            'amount': instance.amount
+            "id": instance.ingredient.id,
+            "name": instance.ingredient.name,
+            "measurement_unit": instance.ingredient.measurement_unit,
+            "amount": instance.amount
         }
 
 
@@ -103,16 +105,9 @@ class TagSerializer(ModelSerializer):
 
 class Base64ImageField(ImageField):
     def to_internal_value(self, data):
-        # Если полученный объект строка, и эта строка
-        # начинается с 'data:image'...
         if isinstance(data, str) and data.startswith('data:image'):
-            # ...начинаем декодировать изображение из base64.
-            # Сначала нужно разделить строку на части.
             format, imgstr = data.split(';base64,')
-            # И извлечь расширение файла.
             ext = format.split('/')[-1]
-            # Затем декодировать сами данные и поместить результат в файл,
-            # которому дать название по шаблону.
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
 
         return super().to_internal_value(data)
@@ -249,6 +244,13 @@ class UserWithRecipesSerializer(UserSerializer):
 
 
 class FollowSerializer(ModelSerializer):
+    user = StringRelatedField(
+        default=CurrentUserDefault()
+    )
+    author = StringRelatedField(
+        default=CurrentAuthorDefault()
+    )
+
     class Meta:
         model = Follow
         fields = '__all__'
@@ -272,7 +274,7 @@ class FollowSerializer(ModelSerializer):
         request = self.context.get('request')
         repr = UserWithRecipesSerializer(
             instance.author,
-            context={'request': request}
+            context={"request": request}
         ).data
         return repr
 
