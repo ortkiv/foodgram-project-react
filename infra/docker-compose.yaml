@@ -7,7 +7,7 @@ services:
     env_file:
       - ./.env
   web:
-    build: ../backend/foodgramm/
+    image: ortkiv/web:v1
     command: gunicorn foodgramm.wsgi:application --bind 0.0.0.0:8000
     restart: always
     ports:
@@ -20,9 +20,7 @@ services:
     env_file:
       - ./.env
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: ortkiv/frontend_web:v1
     volumes:
       - ../frontend/:/app/result_build/
   nginx:
