@@ -22,4 +22,4 @@ jobs:
           pip install -r requirements.txt
       - name: Test with flake8
         run: |
-          python -m flake 8
+          python -m flake8
