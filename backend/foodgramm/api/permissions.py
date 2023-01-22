@@ -9,6 +9,6 @@ class IsAuthorOrReadOnly(permissions.BasePermission):
         if self.has_permission(request, view):
             return True
         return (
-            request.user.is_authenticated and
-            (request.user == obj.author or request.user.is_superuser)
+            request.user.is_authenticated
+            and (request.user == obj.author or request.user.is_superuser)
         )

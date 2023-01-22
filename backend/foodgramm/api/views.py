@@ -68,8 +68,7 @@ class RecipeViewSet(ModelViewSet):
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
         obj = get_object_or_404(Favorite, recipe=recipe, user=user)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -91,8 +90,7 @@ class RecipeViewSet(ModelViewSet):
             if ser.is_valid():
                 ser.save()
                 return Response(ser.data, status=status.HTTP_201_CREATED)
-            else:
-                return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
         obj = get_object_or_404(InShopCart, recipe=recipe, user=user)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

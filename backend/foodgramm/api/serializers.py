@@ -272,11 +272,10 @@ class FollowSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         request = self.context.get('request')
-        repr = UserWithRecipesSerializer(
+        return UserWithRecipesSerializer(
             instance.author,
             context={"request": request}
         ).data
-        return repr
 
 
 class FavoriteSerializer(ModelSerializer):
