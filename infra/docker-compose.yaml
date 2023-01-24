@@ -8,6 +8,7 @@ services:
       - ./.env
   web:
     image: ortkiv/web:v1
+    command: gunicorn foodgramm.wsgi:application --bind 0.0.0.0:8000
     restart: always
     volumes:
       - static_value:/usr/src/app/web/static/
