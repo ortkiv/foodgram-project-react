@@ -14,7 +14,12 @@ DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 
-CSRF_TRUSTED_ORIGINS = ['http://*.localhost/admin/', 'https://*.localhost/admin/', 'http://*.158.160.9.27/admin/', 'https://*.158.160.9.27/admin/']
+CSRF_TRUSTED_ORIGINS = [
+    'http://*.localhost/admin/',
+    'https://*.localhost/admin/',
+    'http://*.158.160.9.27/admin/',
+    'https://*.158.160.9.27/admin/'
+]
 
 
 INSTALLED_APPS = [
