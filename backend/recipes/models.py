@@ -1,50 +1,10 @@
-from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
+from ingredients.models import Ingredient
+from tags.models import Tag
 
 User = get_user_model()
-
-
-class Ingridient(models.Model):
-    name = models.CharField(
-        'Название',
-        max_length=200
-    )
-    measurement_unit = models.CharField(
-        'Единицы измерения',
-        max_length=80
-    )
-
-    class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Ингридиенты'
-
-    def __str__(self) -> str:
-        return self.name
-
-
-class Tag(models.Model):
-    name = models.CharField(
-        'Название',
-        max_length=200
-    )
-    color = ColorField(
-        'Цвет',
-        default='#FF0000'
-    )
-    slug = models.SlugField(
-        'Slug',
-        max_length=200,
-        unique=True
-    )
-
-    class Meta:
-        verbose_name = 'Тег'
-        verbose_name_plural = 'Теги'
-
-    def __str__(self) -> str:
-        return self.name
 
 
 class Recipe(models.Model):
@@ -68,14 +28,13 @@ class Recipe(models.Model):
         upload_to='foodgramm/images/'
     )
     ingredients = models.ManyToManyField(
-        Ingridient,
+        Ingredient,
         through='IngredientInRecipe'
     )
     tags = models.ManyToManyField(
         Tag,
         related_name='recipes',
-        verbose_name='Тэг',
-        blank=True
+        verbose_name='Тэг'
     )
     cooking_time = models.IntegerField(
         'Время приготовления в минутах',
@@ -93,9 +52,17 @@ class Recipe(models.Model):
 
 
 class IngredientInRecipe(models.Model):
-    ingredient = models.ForeignKey(Ingridient, on_delete=models.CASCADE)
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
-    amount = models.IntegerField(validators=[MinValueValidator(1)])
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE
+    )
+    amount = models.IntegerField(
+        validators=[MinValueValidator(1)]
+    )
 
     class Meta:
         constraints = [
@@ -107,34 +74,6 @@ class IngredientInRecipe(models.Model):
 
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'
-
-
-class Follow(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='follower',
-        verbose_name='Подписчик'
-    )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='publisher',
-        verbose_name='Автор подписки'
-    )
-
-    class Meta:
-        verbose_name = 'Подписку'
-        verbose_name_plural = 'Подписки'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['author', 'user'],
-                name='unique follow'
-            )
-        ]
-
-    def __str__(self) -> str:
-        return f'{self.author} - {self.user}'
 
 
 class Favorite(models.Model):
@@ -152,8 +91,8 @@ class Favorite(models.Model):
     )
 
     class Meta:
-        verbose_name = 'Избранный'
-        verbose_name_plural = 'Избранные'
+        verbose_name = 'Избранный рецепт'
+        verbose_name_plural = 'Избранные рецепты'
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'user'],
