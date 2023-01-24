@@ -1,16 +1,11 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import (
-    UserCreateSerializer as DjoserUserCreateSerializer,
-    UserSerializer as DjoserUserSerializer
-)
+from djoser.serializers import \
+    UserCreateSerializer as DjoserUserCreateSerializer
+from djoser.serializers import UserSerializer as DjoserUserSerializer
 from recipes.models import Recipe
-from rest_framework.serializers import (
-    CurrentUserDefault,
-    ModelSerializer,
-    SerializerMethodField,
-    StringRelatedField,
-    ValidationError
-)
+from rest_framework.serializers import (CurrentUserDefault, ModelSerializer,
+                                        SerializerMethodField,
+                                        StringRelatedField, ValidationError)
 from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import CurrentAuthorDefault
