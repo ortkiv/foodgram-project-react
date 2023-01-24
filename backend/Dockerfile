@@ -10,7 +10,9 @@ COPY requirements.txt .
 
 RUN pip3 install -r requirements.txt --no-cache-dir
 
-RUN ls -la
+RUN chmod 777 docker-entrypoint.sh
+
+RUN ls -l docker-entrypoint.sh
 
 COPY . .
 
