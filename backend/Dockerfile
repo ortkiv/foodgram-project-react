@@ -6,7 +6,9 @@ RUN apt install -y netcat
 
 WORKDIR /usr/src/app/web
 
-RUN chmod 777docker-entrypoint.sh
+RUN ls -la
+
+RUN chmod 777 docker-entrypoint.sh
 
 RUN ls -l docker-entrypoint.sh
 
