@@ -73,7 +73,7 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           key:        ${{ secrets.SSH_KEY }}
           script:     |
-            sudo docker-compose stop
+            sudo docker-compose down
             sudo docker-compose rm -f web
             sudo docker-compose pull web
             sudo rm .env
