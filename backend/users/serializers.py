@@ -1,7 +1,6 @@
 from django.contrib.auth import get_user_model
-from djoser.serializers import (UserCreateSerializer
-                                as DjoserUserCreateSerializer)
-from djoser.serializers import UserSerializer as DjoserUserSerializer
+from djoser.serializers import (UserCreateSerializer as DjoserUserCreate,
+                                UserSerializer as DjoserUser)
 from recipes.models import Recipe
 from rest_framework.serializers import (CurrentUserDefault, ModelSerializer,
                                         SerializerMethodField,
@@ -14,7 +13,7 @@ from .models import Follow
 User = get_user_model()
 
 
-class CustomUserSerializer(DjoserUserSerializer):
+class CustomUserSerializer(DjoserUser):
     is_subscribed = SerializerMethodField()
 
     class Meta():
@@ -38,7 +37,7 @@ class CustomUserSerializer(DjoserUserSerializer):
         return False
 
 
-class CustomUserCreateSerializer(DjoserUserCreateSerializer):
+class CustomUserCreateSerializer(DjoserUserCreate):
     class Meta():
         model = User
         fields = (
