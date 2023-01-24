@@ -12,4 +12,4 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 
 COPY . .
 
-ENTRYPOINT ["chmod", "777", "/usr/src/app/web/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/src/app/web/docker-entrypoint.sh"]
