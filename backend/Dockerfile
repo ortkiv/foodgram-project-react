@@ -12,4 +12,4 @@ RUN pip3 install -r requirements.txt --no-cache-dir
 
 COPY . .
 
-CMD ["gunicorn", "foodgramm.wsgi:application", "--bind", "0:8000" ]
+ENTRYPOINT ["chmod", "+x", "/usr/src/app/web/docker-entrypoint.sh"]
