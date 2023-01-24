@@ -10,6 +10,10 @@ COPY requirements.txt .
 
 RUN pip3 install -r requirements.txt --no-cache-dir
 
+RUN chmod 777 docker-entrypoint.sh
+
+RUN ls -la
+
 COPY . .
 
 ENTRYPOINT ["/usr/src/app/web/docker-entrypoint.sh"]
