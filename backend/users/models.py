@@ -19,6 +19,22 @@ class User(AbstractUser):
         verbose_name='email address'
     )
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ('username',)
+
+    class Meta:
+        verbose_name = 'Пользователя'
+        verbose_name_plural = 'Пользователи'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique user'
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.author} - {self.user}'
+
 
 class Follow(models.Model):
     user = models.ForeignKey(
