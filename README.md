@@ -1,4 +1,4 @@
-[![foodgram_project_react](https://github.com/ortkiv/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?branch=master)](http//158.160.9.27/admin/)
+[![foodgram_project_react](https://github.com/ortkiv/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg?branch=master)](http://158.160.9.27/admin/)
 
 
 
