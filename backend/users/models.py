@@ -18,9 +18,6 @@ class User(AbstractUser):
         max_length=254,
         verbose_name='email address'
     )
-    is_subscribed = models.BooleanField(
-        default=False
-    )
 
 
 class Follow(models.Model):

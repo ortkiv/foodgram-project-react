@@ -16,6 +16,10 @@ python manage.py migrate --noinput
 
 python manage.py collectstatic --no-input --clear
 
+python manage.py add_ingredients
+
+python manage.py add_tags
+
 python manage.py createsuperuser --noinput
 
 exec "$@"
