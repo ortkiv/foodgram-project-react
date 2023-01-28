@@ -12,23 +12,23 @@ class UserAdmin(admin.ModelAdmin):
     form = CustomUserCreationForm
     list_display = (
         'pk',
-        'username',
         'first_name',
         'last_name',
+        'username',
         'email',
-        'password',
         'is_superuser',
         'is_active'
     )
     list_editable = (
-        'password',
         'first_name',
         'last_name',
-        'is_active'
+        'is_active',
     )
-    search_fields = ('username',)
+    search_fields = (
+        'username',
+    )
     list_filter = (
-        'first_name',
+        'username',
         'email'
     )
     empty_value_display = '-пусто-'
