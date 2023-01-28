@@ -62,7 +62,7 @@ jobs:
           host:             ${{ secrets.HOST }}
           passphrase:       ${{ secrets.PASSPHRASE }}
           key:              ${{ secrets.SSH_KEY }}
-          source:           "infra/docker-compose.yaml,infra/nginx/"
+          source:           "infra/docker-compose.yaml,infra/nginx/,infra/docs/"
           target:           "."
           strip_components: 1
       - name: Executing Remote SSH CommandS Using SSH Key
