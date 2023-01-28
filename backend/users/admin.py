@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model, models
 
+from .forms import CustomUserCreationForm
 from .models import Follow
 
 User = get_user_model()
@@ -8,6 +9,7 @@ User = get_user_model()
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
+    form = CustomUserCreationForm
     list_display = (
         'pk',
         'username',
@@ -30,6 +32,17 @@ class UserAdmin(admin.ModelAdmin):
         'email'
     )
     empty_value_display = '-пусто-'
+    fieldsets = (
+        (None, {'fields': (
+            'first_name',
+            'last_name',
+            'username',
+            'email',
+            'password1',
+            'password2'
+        )}),
+        ('Permissions', {'fields': ('is_staff', 'is_active')}),
+    )
 
 
 @admin.register(Follow)
