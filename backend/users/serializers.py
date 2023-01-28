@@ -4,7 +4,7 @@ from djoser.serializers import UserSerializer as DjoserUser
 from recipes.models import Recipe
 from rest_framework.serializers import (CurrentUserDefault, ModelSerializer,
                                         SerializerMethodField,
-                                        StringRelatedField, ValidationError)
+                                        StringRelatedField)
 from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import CurrentAuthorDefault
@@ -119,13 +119,6 @@ class FollowSerializer(ModelSerializer):
                         "можно подписаться только один раз!"
             )
         ]
-
-    def validate(self, data):
-        if self.context.get('request').user == data.get('author'):
-            raise ValidationError(
-                "Нельзя подписаться на самого себя!"
-            )
-        return data
 
     def to_representation(self, instance):
         request = self.context.get('request')
