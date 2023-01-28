@@ -5,7 +5,8 @@ from django.core.files.base import ContentFile
 from ingredients.models import Ingredient
 from rest_framework.serializers import (ImageField, ModelSerializer,
                                         PrimaryKeyRelatedField,
-                                        SerializerMethodField)
+                                        SerializerMethodField,
+                                        ValidationError)
 from rest_framework.validators import UniqueTogetherValidator
 from tags.serializers import TagSerializer
 from users.serializers import CustomUserSerializer
@@ -24,13 +25,6 @@ class IngredientInRecipeSerializer(ModelSerializer):
     class Meta:
         model = IngredientInRecipe
         fields = ('id', 'amount')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=IngredientInRecipe.objects.all(),
-                fields=('id', 'amount'),
-                message="Ингредиент уже есть в рецепте! "
-            )
-        ]
 
     def to_representation(self, instance):
         return {
@@ -85,20 +79,26 @@ class RecipeSerializer(ModelSerializer):
             return True
         return False
 
+    def validate(self, data):
+        ingredients = data['ingredientinrecipe_set']['all']
+        ids = []
+        for ingredient in ingredients:
+            if ingredient['ingredient_id'] in ids:
+                raise ValidationError('Задвоенный ингредиент в рецепте!')
+            ids.append(ingredient['ingredient_id'])
+        return data
+
     def create(self, validated_data):
         tags = validated_data.pop('tags')
         ingredients = validated_data.pop('ingredientinrecipe_set')['all']
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         for ingredient in ingredients:
-            if Ingredient.objects.filter(
-                id=ingredient['ingredient_id'].id
-            ).exists():
-                IngredientInRecipe.objects.create(
-                    recipe=recipe,
-                    ingredient=ingredient['ingredient_id'],
-                    amount=ingredient['amount']
-                )
+            IngredientInRecipe.objects.create(
+                recipe=recipe,
+                ingredient=ingredient['ingredient_id'],
+                amount=ingredient['amount']
+            )
         return recipe
 
     def update(self, instance, validated_data):
@@ -113,22 +113,11 @@ class RecipeSerializer(ModelSerializer):
         IngredientInRecipe.objects.filter(recipe=instance).delete()
         ingredients = validated_data.get('ingredientinrecipe_set')['all']
         for ingredient in ingredients:
-            current_ingredent = IngredientInRecipe.objects.filter(
+            IngredientInRecipe.objects.create(
                 recipe=instance,
-                ingredient=ingredient['ingredient_id']
+                ingredient=ingredient['ingredient_id'],
+                amount=ingredient['amount']
             )
-            if current_ingredent.exists():
-                current_ingredent.update(
-                    amount=ingredient['amount']
-                )
-            elif Ingredient.objects.filter(
-                id=ingredient['ingredient_id'].id
-            ).exists():
-                IngredientInRecipe.objects.create(
-                    recipe=instance,
-                    ingredient=ingredient['ingredient_id'],
-                    amount=ingredient['amount']
-                )
         instance.save()
         return instance
 
