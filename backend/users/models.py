@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
+from rest_framework.serializers import ValidationError
 
 
 class CustomUserManager(BaseUserManager):
@@ -77,6 +78,10 @@ class Follow(models.Model):
                 name='unique follow'
             )
         ]
+
+    def clean(self):
+        if self.user == self.author:
+            raise ValidationError('Нельзя подписываться на самого себя!')
 
     def __str__(self) -> str:
         return f'{self.author} - {self.user}'
