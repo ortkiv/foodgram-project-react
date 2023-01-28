@@ -5,8 +5,7 @@ from django.core.files.base import ContentFile
 from ingredients.models import Ingredient
 from rest_framework.serializers import (ImageField, ModelSerializer,
                                         PrimaryKeyRelatedField,
-                                        SerializerMethodField,
-                                        ValidationError)
+                                        SerializerMethodField, ValidationError)
 from rest_framework.validators import UniqueTogetherValidator
 from tags.serializers import TagSerializer
 from users.serializers import CustomUserSerializer
