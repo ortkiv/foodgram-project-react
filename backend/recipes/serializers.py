@@ -49,23 +49,21 @@ class RecipeSerializer(ModelSerializer):
         model = Recipe
         fields = '__all__'
 
-    def get_is_favorited(self, obj):
+    @staticmethod
+    def calculate_field_value(self, obj, model):
         user = self.context.get('request').user
-        if user.is_authenticated and Favorite.objects.filter(
+        if user.is_authenticated and model.objects.filter(
             user=user,
             recipe=obj
         ).exists():
             return True
         return False
 
+    def get_is_favorited(self, obj):
+        return self.calculate_field_value(self=self, obj=obj, model=Favorite)
+
     def get_is_in_shopping_cart(self, obj):
-        user = self.context.get('request').user
-        if user.is_authenticated and InShopCart.objects.filter(
-            user=user,
-            recipe=obj
-        ).exists():
-            return True
-        return False
+        return self.calculate_field_value(self=self, obj=obj, model=InShopCart)
 
     def validate(self, data):
         ingredients = data['ingredientinrecipe_set']['all']
