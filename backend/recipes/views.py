@@ -13,9 +13,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from .filters import RecipeFilter
+from utils.filters import RecipeFilter
 from .models import Favorite, IngredientInRecipe, InShopCart, Recipe
-from .pagination import CustomPageNumberPagination
+from utils.pagination import CustomPageNumberPagination
 from .serializers import (FavoriteSerializer, InShopCartSerializer,
                           RecipeSerializer)
 
@@ -41,11 +41,11 @@ class RecipeViewSet(ModelViewSet):
             'recipe': recipe.id,
             'user': user.id
         }
-        ser = serializer(data=data, context={'request': request})
-        if ser.is_valid():
-            ser.save()
-            return Response(ser.data, status=status.HTTP_201_CREATED)
-        return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = serializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
     def static_delete(request, pk, model):

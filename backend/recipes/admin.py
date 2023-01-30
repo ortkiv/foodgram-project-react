@@ -3,10 +3,6 @@ from django.contrib import admin
 from .models import Favorite, InShopCart, Recipe
 
 
-class RecipeTagInline(admin.TabularInline):
-    model = Recipe.tags.through
-
-
 class RecipeIngredientsInline(admin.TabularInline):
     model = Recipe.ingredients.through
 
@@ -27,21 +23,21 @@ class RecipeAdmin(admin.ModelAdmin):
         'text'
     )
     filter_horizontal = ('tags',)
-
-    def count_favorite(self, obj):
-        return Favorite.objects.filter(recipe=obj).count()
-    count_favorite.short_description = 'Кол-во добавлений в избранное'
-    list_editable = (
-        'author',
-        'name',
-        'text'
-    )
     list_filter = (
         'name',
         'author',
         'tags'
     )
     empty_value_display = '-пусто-'
+
+    def count_favorite(self, obj):
+        return Recipe.objects.filter(fav_recipes__recipe=obj).count()
+    count_favorite.short_description = 'Кол-во добавлений в избранное'
+    list_editable = (
+        'author',
+        'name',
+        'text'
+    )
 
 
 @admin.register(Favorite)

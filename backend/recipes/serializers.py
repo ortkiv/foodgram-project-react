@@ -1,15 +1,13 @@
-import base64
-
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
 from ingredients.models import Ingredient
-from rest_framework.serializers import (ImageField, ModelSerializer,
+from rest_framework.serializers import (ModelSerializer,
                                         PrimaryKeyRelatedField,
                                         SerializerMethodField, ValidationError)
 from rest_framework.validators import UniqueTogetherValidator
 from tags.serializers import TagSerializer
 from users.serializers import CustomUserSerializer
 
+from .fields import Base64ImageField
 from .models import Favorite, IngredientInRecipe, InShopCart, Recipe
 
 User = get_user_model()
@@ -32,16 +30,6 @@ class IngredientInRecipeSerializer(ModelSerializer):
             "measurement_unit": instance.ingredient.measurement_unit,
             "amount": instance.amount
         }
-
-
-class Base64ImageField(ImageField):
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
 
 
 class RecipeSerializer(ModelSerializer):
