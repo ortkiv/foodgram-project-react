@@ -1,5 +1,6 @@
-from colorfield.fields import ColorField
 from django.db import models
+
+from colorfield.fields import ColorField
 
 
 class Tag(models.Model):

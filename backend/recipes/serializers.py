@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+
 from ingredients.models import Ingredient
 from rest_framework.serializers import (ModelSerializer,
                                         PrimaryKeyRelatedField,

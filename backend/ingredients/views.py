@@ -1,6 +1,6 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet
-
 from utils.filters import IngredientSearchFilter
+
 from .models import Ingredient
 from .serializers import IngredientSerializer
 

@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+
 from django_filters.rest_framework import DjangoFilterBackend
 from ingredients.models import Ingredient
 from reportlab.lib.pagesizes import A4
@@ -12,10 +13,10 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-
 from utils.filters import RecipeFilter
-from .models import Favorite, IngredientInRecipe, InShopCart, Recipe
 from utils.pagination import CustomPageNumberPagination
+
+from .models import Favorite, IngredientInRecipe, InShopCart, Recipe
 from .serializers import (FavoriteSerializer, InShopCartSerializer,
                           RecipeSerializer)
 

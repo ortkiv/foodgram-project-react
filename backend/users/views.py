@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+
 from djoser.views import UserViewSet as DjoserUserViewSet
-from utils.pagination import CustomPageNumberPagination
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
+from utils.pagination import CustomPageNumberPagination
 
 from .models import Follow
 from .serializers import (CustomUserSerializer, FollowSerializer,

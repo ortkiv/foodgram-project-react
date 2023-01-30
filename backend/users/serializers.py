@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+
 from djoser.serializers import UserCreateSerializer as DjoserUserCreate
 from djoser.serializers import UserSerializer as DjoserUser
 from recipes.models import Recipe
