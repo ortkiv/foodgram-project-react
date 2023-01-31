@@ -142,6 +142,14 @@ class FavoriteSerializer(ModelSerializer):
             )
         ]
 
+    def to_representation(self, instance):
+        return {
+            "id": instance.recipe.id,
+            "name": instance.recipe.name,
+            # "image": instance.recipe.image,
+            "cooking_time": instance.recipe.cooking_time
+        }
+
 
 class InShopCartSerializer(ModelSerializer):
     class Meta:
