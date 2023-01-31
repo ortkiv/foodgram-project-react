@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
-
 from djoser.serializers import UserCreateSerializer as DjoserUserCreate
 from djoser.serializers import UserSerializer as DjoserUser
-from recipes.models import Recipe
 from rest_framework.serializers import (CurrentUserDefault, ModelSerializer,
                                         SerializerMethodField,
                                         StringRelatedField)
@@ -10,6 +8,7 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from .fields import CurrentAuthorDefault
 from .models import Follow
+from recipes.models import Recipe
 
 User = get_user_model()
 

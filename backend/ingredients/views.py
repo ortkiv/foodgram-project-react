@@ -1,8 +1,8 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from utils.filters import IngredientSearchFilter
 
 from .models import Ingredient
 from .serializers import IngredientSerializer
+from utils.filters import IngredientSearchFilter
 
 
 class IngredientViewSet(ReadOnlyModelViewSet):
