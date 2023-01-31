@@ -8,7 +8,7 @@ from .fields import Base64ImageField
 from .models import Favorite, IngredientInRecipe, InShopCart, Recipe
 from ingredients.models import Ingredient
 from tags.serializers import TagSerializer
-from users.serializers import CustomUserSerializer
+from users.serializers import CustomUserSerializer, RecipeMinifiedSerializer
 
 User = get_user_model()
 
@@ -143,12 +143,12 @@ class FavoriteSerializer(ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        return {
-            "id": instance.recipe.id,
-            "name": instance.recipe.name,
-            # "image": instance.recipe.image,
-            "cooking_time": instance.recipe.cooking_time
-        }
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeMinifiedSerializer(
+            instance.recipe,
+            context=context
+        ).data
 
 
 class InShopCartSerializer(ModelSerializer):
@@ -165,9 +165,9 @@ class InShopCartSerializer(ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        return {
-            "id": instance.recipe.id,
-            "name": instance.recipe.name,
-            # "image": instance.recipe.image,
-            "cooking_time": instance.recipe.cooking_time
-        }
+        request = self.context.get('request')
+        context = {'request': request}
+        return RecipeMinifiedSerializer(
+            instance.recipe,
+            context=context
+        ).data
