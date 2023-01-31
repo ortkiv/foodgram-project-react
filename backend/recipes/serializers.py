@@ -59,11 +59,28 @@ class RecipeSerializer(ModelSerializer):
             return True
         return False
 
+    @staticmethod
+    def create_ingred_in_recipe(ingredients, recipe):
+        for ingredient in ingredients:
+            IngredientInRecipe.objects.create(
+                recipe=recipe,
+                ingredient=ingredient['ingredient_id'],
+                amount=ingredient['amount']
+            )
+
     def get_is_favorited(self, obj):
-        return self.calculate_field_value(self=self, obj=obj, model=Favorite)
+        return self.calculate_field_value(
+            self=self,
+            obj=obj,
+            model=Favorite
+        )
 
     def get_is_in_shopping_cart(self, obj):
-        return self.calculate_field_value(self=self, obj=obj, model=InShopCart)
+        return self.calculate_field_value(
+            self=self,
+            obj=obj,
+            model=InShopCart
+        )
 
     def validate(self, data):
         ingredients = data['ingredientinrecipe_set']['all']
@@ -79,12 +96,10 @@ class RecipeSerializer(ModelSerializer):
         ingredients = validated_data.pop('ingredientinrecipe_set')['all']
         recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
-        for ingredient in ingredients:
-            IngredientInRecipe.objects.create(
-                recipe=recipe,
-                ingredient=ingredient['ingredient_id'],
-                amount=ingredient['amount']
-            )
+        self.create_ingred_in_recipe(
+            ingredients=ingredients,
+            recipe=recipe
+        )
         return recipe
 
     def update(self, instance, validated_data):
@@ -98,12 +113,10 @@ class RecipeSerializer(ModelSerializer):
         instance.tags.set(validated_data.get('tags', instance.tags))
         IngredientInRecipe.objects.filter(recipe=instance).delete()
         ingredients = validated_data.get('ingredientinrecipe_set')['all']
-        for ingredient in ingredients:
-            IngredientInRecipe.objects.create(
-                recipe=instance,
-                ingredient=ingredient['ingredient_id'],
-                amount=ingredient['amount']
-            )
+        self.create_ingred_in_recipe(
+            ingredients=ingredients,
+            recipe=instance
+        )
         instance.save()
         return instance
 
