@@ -28,16 +28,16 @@ class RecipeAdmin(admin.ModelAdmin):
         'author',
         'tags'
     )
-    empty_value_display = '-пусто-'
-
-    def count_favorite(self, obj):
-        return Recipe.objects.filter(fav_recipes__recipe=obj).count()
-    count_favorite.short_description = 'Кол-во добавлений в избранное'
     list_editable = (
         'author',
         'name',
         'text'
     )
+    empty_value_display = '-пусто-'
+
+    def count_favorite(self, obj):
+        return Recipe.objects.filter(fav_recipes__recipe=obj).count()
+    count_favorite.short_description = 'Кол-во добавлений в избранное'
 
 
 @admin.register(Favorite)
