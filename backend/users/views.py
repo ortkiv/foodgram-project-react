@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -9,7 +8,6 @@ from .models import Follow
 from .serializers import (CustomUserSerializer, FollowSerializer,
                           UserWithRecipesSerializer)
 from .viewsets import CreateDestroyViewSet, ListViewSet
-from utils.filters import RecipeFilter
 from utils.pagination import CustomPageNumberPagination
 
 User = get_user_model()
@@ -19,8 +17,6 @@ class MyUserViewSet(DjoserUserViewSet):
     queryset = User.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = CustomUserSerializer
-    filter_backends = (DjangoFilterBackend,)
-    filterset_class = RecipeFilter
 
 
 class SubscriptionsViewSet(ListViewSet):
