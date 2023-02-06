@@ -1,12 +1,10 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer as DjoserUserCreate
 from djoser.serializers import UserSerializer as DjoserUser
-from rest_framework.serializers import (CurrentUserDefault, ModelSerializer,
-                                        SerializerMethodField,
-                                        StringRelatedField)
+from rest_framework.serializers import (ModelSerializer, SerializerMethodField,
+                                        ValidationError)
 from rest_framework.validators import UniqueTogetherValidator
 
-from .fields import CurrentAuthorDefault
 from .models import Follow
 from recipes.models import Recipe
 
@@ -101,13 +99,6 @@ class UserWithRecipesSerializer(CustomUserSerializer):
 
 
 class FollowSerializer(ModelSerializer):
-    user = StringRelatedField(
-        default=CurrentUserDefault()
-    )
-    author = StringRelatedField(
-        default=CurrentAuthorDefault()
-    )
-
     class Meta:
         model = Follow
         fields = '__all__'
@@ -119,6 +110,11 @@ class FollowSerializer(ModelSerializer):
                         "можно подписаться только один раз!"
             )
         ]
+
+    def validate(self, data):
+        if self.context.get('request').user.id == data.get('author').id:
+            raise ValidationError('Нельзя подписаться на самого себя!')
+        return data
 
     def to_representation(self, instance):
         request = self.context.get('request')

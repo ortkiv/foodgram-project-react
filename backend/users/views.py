@@ -1,14 +1,16 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from djoser.conf import settings
 from djoser.views import UserViewSet as DjoserUserViewSet
+from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
+from rest_framework.response import Response
 
 from .models import Follow
 from .serializers import (CustomUserSerializer, FollowSerializer,
                           UserWithRecipesSerializer)
-from .viewsets import CreateDestroyViewSet, ListViewSet
-from utils.pagination import CustomPageNumberPagination
 
 User = get_user_model()
 
@@ -18,31 +20,94 @@ class MyUserViewSet(DjoserUserViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     serializer_class = CustomUserSerializer
 
+    def get_serializer_class(self):
+        if self.action == "create":
+            if settings.USER_CREATE_PASSWORD_RETYPE:
+                return settings.SERIALIZERS.user_create_password_retype
+            return settings.SERIALIZERS.user_create
+        elif self.action == "destroy" or (
+            self.action == "me"
+            and self.request and self.request.method == "DELETE"
+        ):
+            return settings.SERIALIZERS.user_delete
+        elif self.action == "activation":
+            return settings.SERIALIZERS.activation
+        elif self.action == "resend_activation":
+            return settings.SERIALIZERS.password_reset
+        elif self.action == "reset_password":
+            return settings.SERIALIZERS.password_reset
+        elif self.action == "reset_password_confirm":
+            if settings.PASSWORD_RESET_CONFIRM_RETYPE:
+                return settings.SERIALIZERS.password_reset_confirm_retype
+            return settings.SERIALIZERS.password_reset_confirm
+        elif self.action == "set_password":
+            if settings.SET_PASSWORD_RETYPE:
+                return settings.SERIALIZERS.set_password_retype
+            return settings.SERIALIZERS.set_password
+        elif self.action == "set_username":
+            if settings.SET_USERNAME_RETYPE:
+                return settings.SERIALIZERS.set_username_retype
+            return settings.SERIALIZERS.set_username
+        elif self.action == "reset_username":
+            return settings.SERIALIZERS.username_reset
+        elif self.action == "reset_username_confirm":
+            if settings.USERNAME_RESET_CONFIRM_RETYPE:
+                return settings.SERIALIZERS.username_reset_confirm_retype
+            return settings.SERIALIZERS.username_reset_confirm
+        elif self.action == "me":
+            return settings.SERIALIZERS.current_user
+        elif self.action == "subscriptions":
+            return UserWithRecipesSerializer
+        elif self.action == "subscribe" and self.request.method == "POST":
+            return FollowSerializer
 
-class SubscriptionsViewSet(ListViewSet):
-    serializer_class = UserWithRecipesSerializer
-    permission_classes = (IsAuthenticated,)
-    pagination_class = CustomPageNumberPagination
+        return self.serializer_class
 
-    def get_queryset(self):
-        return User.objects.filter(publisher__user=self.request.user)
-
-
-class SubscribeViewSet(CreateDestroyViewSet):
-    serializer_class = FollowSerializer
-    permission_classes = (IsAuthenticated,)
-    pagination_class = CustomPageNumberPagination
-    queryset = Follow.objects.all()
-
-    def get_object(self):
-        obj = get_object_or_404(
-            Follow,
-            user=self.request.user,
-            author=self.kwargs.get('user_id')
+    @action(
+        detail=False,
+        permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        users = User.objects.filter(publisher__user=self.request.user)
+        page = self.paginate_queryset(users)
+        if page is not None:
+            serializer = self.get_serializer(
+                page,
+                many=True,
+                context={'request': request}
+            )
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(
+            users,
+            many=True,
+            context={'request': request}
         )
-        self.check_object_permissions(self.request, obj)
-        return obj
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def perform_create(self, serializer):
-        author = get_object_or_404(User, id=self.kwargs.get('user_id'))
-        serializer.save(user=self.request.user, author=author)
+    @action(
+        detail=True,
+        methods=['post'],
+        permission_classes=[IsAuthenticated]
+    )
+    def subscribe(self, request, id=None):
+        user = request.user
+        author = get_object_or_404(User, pk=id)
+        data = {
+            'user': user.id,
+            'author': author.id
+        }
+        serializer = self.get_serializer(
+            data=data,
+            context={'request': request}
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @subscribe.mapping.delete
+    def delete_subscribe(self, request, id=None):
+        user = request.user
+        author = get_object_or_404(User, pk=id)
+        subscribe = get_object_or_404(Follow, user=user, author=author)
+        subscribe.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
