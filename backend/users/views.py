@@ -60,7 +60,6 @@ class MyUserViewSet(DjoserUserViewSet):
             return UserWithRecipesSerializer
         elif self.action == "subscribe" and self.request.method == "POST":
             return FollowSerializer
-
         return self.serializer_class
 
     @action(
